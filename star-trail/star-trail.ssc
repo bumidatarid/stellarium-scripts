@@ -1,0 +1,194 @@
+// CONFIGURATION
+
+// location & time
+lat = 0.0791359;
+lng = 99.8768599;
+alt = 2919;
+name = 'Mt Talakmau';
+time = '2017:05:01T12:00:00';
+//time = '2017:05:01T00:00:00';
+tz = 'local';
+
+// parameters
+delay = 30;          // delay between pics
+num = 86400 / delay; // number of pics to take
+// num = 10; // number of pics to take
+
+// magnitudes
+magStar = {
+    absolute: 6,
+    relative: 1,
+    limit: 4.5
+};
+
+magTrail = {
+    absolute: 1,
+    relative: 0.25,
+    limit: 4.5
+};
+
+milkywayintensity = 1.5;
+
+// INITIALIZATION
+
+core.wait(2);
+
+// get resolution
+var screen_y = core.getScreenHeight();
+var screen_x = core.getScreenWidth();
+
+// wait before taking screenshot
+wait = .05;
+
+// stop time
+core.setTimeRate(0)
+
+// set location
+core.setObserverLocation(lng, lat, alt, 0, name, 'earth');
+
+// set initial time
+core.setDate(time, tz);
+
+// disable gui
+core.setGuiVisible(false);
+
+// solar system
+SolarSystem.setFlagLabels(false);
+
+// constellation
+ConstellationMgr.setFlagLabels(false);
+
+// stars
+StarMgr.setFlagLabels(false);
+
+// enable magnitude limit
+StelSkyDrawer.setFlagStarMagnitudeLimit(true);
+
+// disable dynamic eye adaptation
+StelSkyDrawer.setFlagLuminanceAdaptation(false);
+
+// turn off twinkle
+StelSkyDrawer.setFlagTwinkle(0);
+
+// disable cardinal point
+LandscapeMgr.setFlagCardinalsPoints(false);
+
+// milkyway intensity
+MilkyWay.setIntensity(milkywayintensity);
+
+// projection & fov
+//core.setProjectionMode('ProjectionPerspective');
+
+// set projection to fisheye
+core.setProjectionMode('ProjectionFisheye');
+
+// set hfov to 180° (zoomto takes vfov)
+StelMovementMgr.zoomTo(screen_y / screen_x * 180, 0);
+
+// START
+for (i=0; i<=num; i++) {
+    zi = ('00000'+i).slice(-5);
+    core.setDate("+"+delay+" seconds");
+
+    // star screenshots
+    MilkyWay.setFlagShow(false);
+    SolarSystem.setFlagPlanets(true);
+    //StarMgr.setFlagStars(true);
+
+    StelSkyDrawer.setAbsoluteStarScale(magStar.absolute);
+    StelSkyDrawer.setRelativeStarScale(magStar.relative);
+    StelSkyDrawer.setCustomStarMagnitudeLimit(magStar.limit);
+
+    core.moveToAltAzi(0, 0, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-star-N", false, null, true);
+
+    core.moveToAltAzi(0, 90, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-star-E", false, null, true);
+
+    core.moveToAltAzi(0, 180, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-star-S", false, null, true);
+
+    core.moveToAltAzi(0, 270, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-star-W", false, null, true);
+
+    core.moveToAltAzi(90, 0, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-star-U", false, null, true);
+
+    core.moveToAltAzi(-90, 0, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-star-D", false, null, true);
+
+    // trail screenshots
+    StelSkyDrawer.setAbsoluteStarScale(magTrail.absolute);
+    StelSkyDrawer.setRelativeStarScale(magTrail.relative);
+    StelSkyDrawer.setCustomStarMagnitudeLimit(magTrail.limit);
+
+    core.moveToAltAzi(0, 0, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-trail-N", false, null, true);
+
+    core.moveToAltAzi(0, 90, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-trail-E", false, null, true);
+
+    core.moveToAltAzi(0, 180, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-trail-S", false, null, true);
+
+    core.moveToAltAzi(0, 270, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-trail-W", false, null, true);
+
+    core.moveToAltAzi(90, 0, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-trail-U", false, null, true);
+
+    core.moveToAltAzi(-90, 0, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-trail-D", false, null, true);
+
+    // milky way screenshots
+    MilkyWay.setFlagShow(true);
+    SolarSystem.setFlagPlanets(false);
+    //StarMgr.setFlagStars(false);
+    StelSkyDrawer.setCustomStarMagnitudeLimit(0);
+    StelSkyDrawer.setAbsoluteStarScale(0);
+
+    core.moveToAltAzi(0, 0, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-milkyway-N", false, null, true);
+
+    core.moveToAltAzi(0, 90, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-milkyway-E", false, null, true);
+
+    core.moveToAltAzi(0, 180, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-milkyway-S", false, null, true);
+
+    core.moveToAltAzi(0, 270, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-milkyway-W", false, null, true);
+
+    core.moveToAltAzi(90, 0, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-milkyway-U", false, null, true);
+
+    core.moveToAltAzi(-90, 0, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-milkyway-D", false, null, true);
+    barf();
+}
+
+
+
+// for some reason this doesn't work...
+core.quitStellarium();
+
+// so, we add this
+LabelMgr.labelScreen("Press Ctrl-Q to exit ", 50, 50, true, 20, '#ffff00');
