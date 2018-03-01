@@ -1,12 +1,25 @@
 // CONFIGURATION
 
 // location & time
-lat = 0.0791359;
-lng = 99.8768599;
-alt = 2919;
-name = 'Mt Talakmau';
-time = '2017:05:01T12:00:00';
+//lat = 0.0791359;
+//lng = 99.8768599;
+//alt = 2919;
+//name = 'Mt Talakmau';
 //time = '2017:05:01T00:00:00';
+//tz = 'Asia/Jakarta';
+
+//lat = 48.860547;
+//lng = 2.337512;
+//alt = 35;
+//name = 'Paris';
+//time = '2017:05:01T00:00:00';
+//tz = 'Europe/Paris';
+
+lat = -41.288889;
+lng = 174.777222;
+alt = 0;
+name = 'Wellington';
+time = '2017-04-30T19:00:00';
 tz = 'local';
 
 // parameters
@@ -16,8 +29,8 @@ num = 86400 / delay; // number of pics to take
 
 // magnitudes
 magStar = {
-    absolute: 6,
-    relative: 1,
+    absolute: 4,
+    relative: 0.75,
     limit: 4.5
 };
 
@@ -33,6 +46,18 @@ milkywayintensity = 1.5;
 
 core.wait(2);
 
+// landscape
+//LandscapeMgr.setCurrentLandscapeID('schmoelenerduene', 0);
+LandscapeMgr.setFlagLabels(false);
+LandscapeMgr.setFlagLandscapeUseMinimalBrightness(true);
+LandscapeMgr.setFlagLandscapeSetsMinimalBrightness(true);
+
+// disable control
+StelMovementMgr.setFlagEnableZoomKeys(false);
+StelMovementMgr.setFlagEnableMoveKeys(false);
+StelMovementMgr.setFlagEnableMoveAtScreenEdge(false);
+StelMovementMgr.setFlagEnableMouseNavigation(false);
+
 // get resolution
 var screen_y = core.getScreenHeight();
 var screen_x = core.getScreenWidth();
@@ -45,9 +70,6 @@ core.setTimeRate(0)
 
 // set location
 core.setObserverLocation(lng, lat, alt, 0, name, 'earth');
-
-// set initial time
-core.setDate(time, tz);
 
 // disable gui
 core.setGuiVisible(false);
@@ -82,22 +104,31 @@ MilkyWay.setIntensity(milkywayintensity);
 // set projection to fisheye
 core.setProjectionMode('ProjectionFisheye');
 
-// set hfov to 180° (zoomto takes vfov)
-StelMovementMgr.zoomTo(screen_y / screen_x * 180, 0);
+// disable refraction & extinction. not working
+//Refraction.setPressure(0);
+//Refraction.setTemperature(0);
+//Extinction.setExtinctionCoefficient(0);
 
-// START
+// set fov to 120° (zoomto takes vfov)
+if (screen_y >= screen_x) {
+	StelMovementMgr.zoomTo(120, 0);
+} else {
+	StelMovementMgr.zoomTo(screen_y / screen_x * 180, 0);
+}
+
+// START STAR
+MilkyWay.setFlagShow(false);
+SolarSystem.setFlagPlanets(true);
+LandscapeMgr.setFlagLandscape(true);
+StelSkyDrawer.setAbsoluteStarScale(magStar.absolute);
+StelSkyDrawer.setRelativeStarScale(magStar.relative);
+StelSkyDrawer.setCustomStarMagnitudeLimit(magStar.limit);
+core.setDate(time, tz);
+core.wait(5);
+
 for (i=0; i<=num; i++) {
     zi = ('00000'+i).slice(-5);
     core.setDate("+"+delay+" seconds");
-
-    // star screenshots
-    MilkyWay.setFlagShow(false);
-    SolarSystem.setFlagPlanets(true);
-    //StarMgr.setFlagStars(true);
-
-    StelSkyDrawer.setAbsoluteStarScale(magStar.absolute);
-    StelSkyDrawer.setRelativeStarScale(magStar.relative);
-    StelSkyDrawer.setCustomStarMagnitudeLimit(magStar.limit);
 
     core.moveToAltAzi(0, 0, 0);
     core.wait(wait);
@@ -123,41 +154,21 @@ for (i=0; i<=num; i++) {
     core.wait(wait);
     core.screenshot(zi+"-star-D", false, null, true);
 
-    // trail screenshots
-    StelSkyDrawer.setAbsoluteStarScale(magTrail.absolute);
-    StelSkyDrawer.setRelativeStarScale(magTrail.relative);
-    StelSkyDrawer.setCustomStarMagnitudeLimit(magTrail.limit);
+    //barf();
+}
 
-    core.moveToAltAzi(0, 0, 0);
-    core.wait(wait);
-    core.screenshot(zi+"-trail-N", false, null, true);
+/// START MILKY WAY
+MilkyWay.setFlagShow(true);
+SolarSystem.setFlagPlanets(false);
+LandscapeMgr.setFlagLandscape(true);
+StelSkyDrawer.setCustomStarMagnitudeLimit(0);
+StelSkyDrawer.setAbsoluteStarScale(0);
+core.setDate(time, tz);
+core.wait(5);
 
-    core.moveToAltAzi(0, 90, 0);
-    core.wait(wait);
-    core.screenshot(zi+"-trail-E", false, null, true);
-
-    core.moveToAltAzi(0, 180, 0);
-    core.wait(wait);
-    core.screenshot(zi+"-trail-S", false, null, true);
-
-    core.moveToAltAzi(0, 270, 0);
-    core.wait(wait);
-    core.screenshot(zi+"-trail-W", false, null, true);
-
-    core.moveToAltAzi(90, 0, 0);
-    core.wait(wait);
-    core.screenshot(zi+"-trail-U", false, null, true);
-
-    core.moveToAltAzi(-90, 0, 0);
-    core.wait(wait);
-    core.screenshot(zi+"-trail-D", false, null, true);
-
-    // milky way screenshots
-    MilkyWay.setFlagShow(true);
-    SolarSystem.setFlagPlanets(false);
-    //StarMgr.setFlagStars(false);
-    StelSkyDrawer.setCustomStarMagnitudeLimit(0);
-    StelSkyDrawer.setAbsoluteStarScale(0);
+for (i=0; i<=num; i++) {
+    zi = ('00000'+i).slice(-5);
+    core.setDate("+"+delay+" seconds");
 
     core.moveToAltAzi(0, 0, 0);
     core.wait(wait);
@@ -182,10 +193,56 @@ for (i=0; i<=num; i++) {
     core.moveToAltAzi(-90, 0, 0);
     core.wait(wait);
     core.screenshot(zi+"-milkyway-D", false, null, true);
-    barf();
+    //barf();
 }
 
+/// START TRAIL
+StelSkyDrawer.setAbsoluteStarScale(magTrail.absolute);
+StelSkyDrawer.setRelativeStarScale(magTrail.relative);
+StelSkyDrawer.setCustomStarMagnitudeLimit(magTrail.limit);
+LandscapeMgr.setFlagLandscape(false);
+MilkyWay.setFlagShow(false);
+SolarSystem.setFlagPlanets(false);
+core.setDate(time, tz);
+core.wait(5);
 
+for (i=0; i<=num; i++) {
+    zi = ('00000'+i).slice(-5);
+    core.setDate("+"+delay+" seconds");
+
+    // trail screenshots
+    core.moveToAltAzi(0, 0, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-trail-N", false, null, true);
+
+    core.moveToAltAzi(0, 90, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-trail-E", false, null, true);
+
+    core.moveToAltAzi(0, 180, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-trail-S", false, null, true);
+
+    core.moveToAltAzi(0, 270, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-trail-W", false, null, true);
+
+    core.moveToAltAzi(90, 0, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-trail-U", false, null, true);
+
+    core.moveToAltAzi(-90, 0, 0);
+    core.wait(wait);
+    core.screenshot(zi+"-trail-D", false, null, true);
+
+    //barf();
+}
+
+// enable control
+StelMovementMgr.setFlagEnableZoomKeys(true);
+StelMovementMgr.setFlagEnableMoveKeys(true);
+StelMovementMgr.setFlagEnableMoveAtScreenEdge(true);
+StelMovementMgr.setFlagEnableMouseNavigation(true);
 
 // for some reason this doesn't work...
 core.quitStellarium();
